@@ -1,5 +1,8 @@
 require "jpc/version"
+require "jpc/socket"
+require "jpc/invoker"
+require "jpc/handler"
 
 module JPC
-  # Your code goes here...
+  RPC_VERSION = '2.0'.freeze
 end
