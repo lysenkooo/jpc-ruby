@@ -7,7 +7,7 @@ This gem implements server-side support for JSON-RPC 2.0 via websockets over Eve
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'jpc'
+gem 'jpc', github: 'lysenkooo/jpc-ruby'
 ```
 
 And then execute:
@@ -20,28 +20,23 @@ First of all, you need to create handler.
 
 ```ruby
 class MainHandler < JPC::Handler
-  def test
-    'Success!'
+  def test_hash(params)
+    "Success with #{params.inspect}"
+  end
+
+  def test_array(first, second, third)
+    "Success with #{first} #{second} #{third}"
   end
 
   private
 
   def allowed_methods
-    %w[test]
+    %w[test_hash test_array]
   end
 end
 ```
 
-After that you need to run websocket in your EventMachine.
-
-```ruby
-EventMachine.run do
-  handler = MainHandler.new
-  JPC::Socket.run(handler, host: '0.0.0.0', port: 8090)
-end
-```
-
-After that you can use JSON-RPC 2.0 client to send messages to your websocket.
+Now you can use JSON-RPC 2.0 client to send messages to your websocket.
 
 ## Contributing
 

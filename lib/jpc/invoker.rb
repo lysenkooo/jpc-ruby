@@ -1,52 +1,36 @@
 class JPC::Invoker
+  include JPC::Helpers
+
   def initialize(handler)
     @handler = handler
   end
 
   def invoke(json)
-    data = execute(json)
-
-    data.merge!({
-      jsonrpc: JPC::RPC_VERSION
-    })
-
-    make_response(data)
+    request = Oj.load(json)
+    response = execute(request)
   end
 
   private
 
-  def parse_request(json)
-    Oj.load(json)
-  end
+  def execute(request)
+    method = request['method']
 
-  def make_response(data)
-    Oj.dump(data, mode: :compat)
-  end
-
-  def execute(json)
-    request = parse_request(json)
-
-    fail 'Method not specified' unless request['method']
-    fail 'Method not allowed' unless method_allowed?(request['method'])
-    fail 'Method not found' unless @handler.respond_to?(request['method'])
+    fail "Method #{method} not allowed" unless method_allowed?(method)
 
     if request['params'].is_a?(Array)
-      result = @handler.public_send(request['method'], *request['params'])
-    elsif request['params'].is_a?(Hash)
-      result = @handler.public_send(request['method'], request['params'])
+      result = @handler.public_send(method, *request['params'])
+    elsif %w(Hash String Integer).include?(request['params'].class.name)
+      result = @handler.public_send(method, request['params'])
     else
-      result = @handler.public_send(request['method'])
+      result = @handler.public_send(method)
     end
 
-    {
-      result: result,
-      id: request['id']
-    }
+    make_result(request['id'], result)
   rescue => e
-    {
-      error: { code: -32600, message: e.message },
-      id: request && request['id']
-    }
+    make_error(
+      request['id'],
+      "Method #{method}: #{e.message}. See #{e.backtrace[0]}"
+    )
   end
 
   def method_allowed?(name)

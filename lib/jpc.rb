@@ -1,5 +1,6 @@
 require "jpc/version"
-require "jpc/socket"
+require "jpc/channels"
+require "jpc/helpers"
 require "jpc/invoker"
 require "jpc/handler"
 
