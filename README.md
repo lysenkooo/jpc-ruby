@@ -37,7 +37,7 @@ After that you need to run websocket in your EventMachine.
 ```ruby
 EventMachine.run do
   handler = MainHandler.new
-  JPC::Socket.run(handler. host: '0.0.0.0', port: 8090)
+  JPC::Socket.run(handler, host: '0.0.0.0', port: 8090)
 end
 ```
 
