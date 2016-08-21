@@ -2,9 +2,11 @@
 
 This gem implements server-side support for JSON-RPC 2.0 via websockets over EventMachine.
 
+However it implements channels support to broadcast functions like ActionCable.
+
 ## Installation
 
-Add this line to your application's Gemfile:
+Add follow line to your application's Gemfile:
 
 ```ruby
 gem 'jpc', github: 'lysenkooo/jpc-ruby'
@@ -16,22 +18,64 @@ And then execute:
 
 ## Usage
 
-First of all, you need to create handler.
+You need to create dispatcher if you want to use pub/sub channels.
+
+```ruby
+class Dispatcher
+  include JPC::Channels
+  include JPC::Helpers
+end
+```
+
+Next you need to create handler.
 
 ```ruby
 class MainHandler < JPC::Handler
-  def test_hash(params)
+  def initialize(ws, dispatcher)
+    @ws = ws
+    @dispatcher = dispatcher
+  end
+
+  def test_hash_params(params)
     "Success with #{params.inspect}"
   end
 
-  def test_array(first, second, third)
+  def test_array_params(first, second, third)
     "Success with #{first} #{second} #{third}"
+  end
+
+  def broadcast_message(message)
+    @dispatcher.cast('main_channel', message)
   end
 
   private
 
-  def allowed_methods
-    %w[test_hash test_array]
+  def procedures
+    %w[test_hash_params test_array_params broadcast_message]
+  end
+end
+```
+
+After that you should create invoker instance and set up forwarding JSON
+messages from your client.
+
+```ruby
+EventMachine.run do
+  dispatcher = Dispatcher.new
+
+  EM::WebSocket.run(host: '0.0.0.0', port: 8090) do |ws|
+    handler = MainHandler.new(ws, dispatcher)
+    rpc = JPC::Invoker.new(handler)
+
+    ws.onmessage do |message|
+      response = rpc.invoke(message)
+      ws.send(response)
+    end
+
+    ws.onerror do |error|
+      backtrace = error.backtrace.join("\n")
+      puts "#{error}\n#{backtrace}\n"
+    end
   end
 end
 ```
