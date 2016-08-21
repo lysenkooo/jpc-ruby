@@ -18,24 +18,10 @@ And then execute:
 
 ## Usage
 
-You need to create dispatcher if you want to use pub/sub channels.
-
-```ruby
-class Dispatcher
-  include JPC::Channels
-  include JPC::Helpers
-end
-```
-
-Next you need to create handler.
+First of all you need to create handler.
 
 ```ruby
 class MainHandler < JPC::Handler
-  def initialize(ws, dispatcher)
-    @ws = ws
-    @dispatcher = dispatcher
-  end
-
   def test_hash_params(params)
     "Success with #{params.inspect}"
   end
@@ -61,7 +47,7 @@ messages from your client.
 
 ```ruby
 EventMachine.run do
-  dispatcher = Dispatcher.new
+  dispatcher = JPC::Dispatcher.new
 
   EM::WebSocket.run(host: '0.0.0.0', port: 8090) do |ws|
     handler = MainHandler.new(ws, dispatcher)
