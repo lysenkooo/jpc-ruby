@@ -19,6 +19,10 @@ class JPC::Invoker
 
     @handler.token = request['token'] if request['token']
 
+    if @handler.respond_to?(:authorized?)
+      fail JPC::Errors::UnauthorizedError unless @handler.authorized?(method)
+    end
+
     if request['params'].is_a?(Array)
       result = @handler.public_send(method, *request['params'])
     elsif %w(Hash String Integer).include?(request['params'].class.name)
