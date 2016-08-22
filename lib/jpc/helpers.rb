@@ -14,7 +14,7 @@ module JPC
       make_response(id, result: result)
     end
 
-    def make_error(id, message, code = -32600)
+    def make_error(id, code, message)
       error = {
         code: code,
         message: message

@@ -1,4 +1,6 @@
 class JPC::Handler
+  attr_accessor :token
+
   def initialize(ws, dispatcher)
     @ws = ws
     @dispatcher = dispatcher

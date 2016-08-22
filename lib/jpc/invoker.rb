@@ -17,6 +17,8 @@ class JPC::Invoker
 
     fail "Method #{method} not allowed" unless method_allowed?(method)
 
+    @handler.token = request['token'] if request['token']
+
     if request['params'].is_a?(Array)
       result = @handler.public_send(method, *request['params'])
     elsif %w(Hash String Integer).include?(request['params'].class.name)
@@ -27,8 +29,16 @@ class JPC::Invoker
 
     make_result(request['id'], result)
   rescue => e
+    case e.class.name
+    when 'JPC::Errors::UnauthorizedError'
+      code = 32001
+    else
+      code = 32000
+    end
+
     make_error(
       request['id'],
+      code,
       "Method #{method}: #{e.message}. See #{e.backtrace[0]}"
     )
   end
