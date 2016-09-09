@@ -5,7 +5,7 @@ describe JPC do
     expect(JPC::VERSION).not_to be nil
   end
 
-  it 'does something useful' do
-    expect(false).to eq(true)
+  it 'has a right rpc version number' do
+    expect(JPC::RPC_VERSION).to eq '2.0'
   end
 end
