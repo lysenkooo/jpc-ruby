@@ -1,12 +1,12 @@
-require 'spec_helper'
-
 describe JPC::Invoker do
-  let(:handler) { JPC::Handler.new }
+  let(:ws) { FakeSocket.new }
+  let(:dispatcher) { JPC::Dispatcher.new }
+  let(:handler) { JPC::Handler.new(ws, dispatcher) }
   let(:invoker) { JPC::Invoker.new(handler) }
 
   it 'return right json for ping method' do
     request_id = 1
-    json = make_request(id: request_id, method: 'ping', params: 'test')
+    json = make_request(:ping, id: request_id, params: 'test')
     result_message = invoker.invoke(json)
     result = Oj.load(result_message)
 
@@ -18,7 +18,7 @@ describe JPC::Invoker do
 
   it 'return error for not allowed method' do
     request_id = 2
-    json = make_request(id: request_id, method: 'destroy', params: 'all')
+    json = make_request(:destroy, id: request_id, params: 'all')
     result_message = invoker.invoke(json)
     result = Oj.load(result_message)
 

@@ -1,7 +1,7 @@
 class JPC::Handler
   attr_accessor :token
 
-  def initialize(ws = nil, dispatcher = nil)
+  def initialize(ws, dispatcher)
     @ws = ws
     @dispatcher = dispatcher
   end
