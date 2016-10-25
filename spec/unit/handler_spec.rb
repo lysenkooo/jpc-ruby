@@ -9,7 +9,7 @@ describe JPC::Handler do
   end
 
   it 'return right answer for ping method with params as string' do
-    result = handler.ping(['one', 'two'])
+    result = handler.ping(%w(one two))
     expect(result).to eq 'pong ["one", "two"]'
   end
 
