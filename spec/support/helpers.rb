@@ -1,9 +1,7 @@
 module Helpers
   def make_request(method, data)
-    data.merge!(
-      jsonrpc: '2.0',
-      method:  method.to_s
-    )
+    data[:jsonrpc] = '2.0'
+    data[:method] = method.to_s
 
     Oj.dump(data, mode: :compat)
   end
