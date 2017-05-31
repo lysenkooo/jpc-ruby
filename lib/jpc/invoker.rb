@@ -16,13 +16,9 @@ module JPC
     def execute(request)
       method = request['method']
 
-      raise "Method #{method} not allowed" unless method_allowed?(method)
+      raise "Method #{method} is not allowed" unless @handler.send(:allowed?, method)
 
       @handler.token = request['token'] if request['token']
-
-      if @handler.respond_to?(:authorized?)
-        raise JPC::Errors::UnauthorizedError unless @handler.authorized?(method)
-      end
 
       result = if request['params'].is_a?(Array)
                  @handler.public_send(method, *request['params'])
@@ -34,22 +30,11 @@ module JPC
 
       make_result(request['id'], result)
     rescue => e
-      code = case e.class.name
-             when 'JPC::Errors::UnauthorizedError'
-               32001
-             else
-               32000
-             end
-
       make_error(
         request['id'],
-        code,
-        "Method #{method}: #{e.message}. See #{e.backtrace[0]}"
+        e.class.name,
+        "Method #{method}: [#{e.class.name}] #{e.message} @ #{e.backtrace[0]}"
       )
-    end
-
-    def method_allowed?(name)
-      @handler.send(:allowed_methods).include?(name.to_s)
     end
   end
 end

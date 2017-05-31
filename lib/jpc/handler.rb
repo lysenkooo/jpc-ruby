@@ -8,7 +8,7 @@ module JPC
     end
 
     def ping(params = {})
-      "pong #{params}"
+      "pong #{params.inspect}"
     end
 
     def subscribe(channel)
@@ -21,12 +21,8 @@ module JPC
 
     private
 
-    def allowed_methods
-      procedures + %w(ping subscribe unsubscribe)
-    end
-
-    def procedures
-      []
+    def allowed?(method)
+      %w(ping subscribe unsubscribe).include?(method)
     end
   end
 end
